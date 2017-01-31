@@ -11,12 +11,15 @@ namespace DesktopTracker
 
         private AppFolderManager _appFolderManager;
         private KeyboardHook _keyboardHook;
+        private int _lastIndex;
 
         // constructors
 
         public frmMain()
         {
             this.InitializeComponent();
+
+            this._lastIndex = 0;
 
             this._appFolderManager = new AppFolderManager();
             this._keyboardHook = new KeyboardHook();
@@ -43,7 +46,9 @@ namespace DesktopTracker
             {
                 Top = 0,
                 Left = 0,
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+
+                Index = this._lastIndex++
             };
             counter.CloseButton += this.Counter_CloseButton;
 
@@ -55,6 +60,8 @@ namespace DesktopTracker
         private void RemoveCounterControl(ctlCounter control)
         {
             this.flowLayoutPanel1.Controls.Remove(control);
+
+            this.ReindexAll();
         }
 
         private void LoadItems()
@@ -87,6 +94,35 @@ namespace DesktopTracker
             this._appFolderManager.SaveItems(items);
         }
 
+        private void ReindexAll()
+        {
+            this._lastIndex = 0;
+
+            foreach (var control in this.flowLayoutPanel1.Controls)
+            {
+                var counterControl = control as ctlCounter;
+
+                if (counterControl == null)
+                {
+                    continue;
+                }
+
+                counterControl.Index = this._lastIndex++;
+            }
+        }
+
+        private void SetFocusControl(int index)
+        {
+            if (this.flowLayoutPanel1.Controls.Count <= index)
+            {
+                return;
+            }
+
+            var control = this.flowLayoutPanel1.Controls[index] as ctlCounter;
+
+            control.SetFocus();
+        }
+
         private void btnAdd_Click(object sender, EventArgs e)
         {
             this.AddCounterControl();
@@ -117,6 +153,31 @@ namespace DesktopTracker
         private void _keyboardHook_KeyPressed(object sender, KeyPressedEventArgs e)
         {
             this.Activate();
+        }
+
+        private void frmMain_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Control)
+            {
+                if (e.KeyCode == Keys.N)
+                {
+                    this.AddCounterControl();
+                    e.Handled = true;
+
+                    return;
+                }
+
+                for (var i = 0; i < 10; i++)
+                {
+                    if (e.KeyCode == Keys.D1 + i)
+                    {
+                        this.SetFocusControl(i);
+                        e.Handled = true;
+
+                        return;
+                    }
+                }
+            }
         }
     }
 }

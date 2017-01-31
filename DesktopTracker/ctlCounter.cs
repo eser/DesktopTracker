@@ -7,6 +7,7 @@ namespace DesktopTracker
     {
         // fields
 
+        private int _index;
         private CounterItem _item;
         private Timer _timer;
 
@@ -36,6 +37,15 @@ namespace DesktopTracker
 
         // properties
 
+        public int Index {
+            get {
+                return this._index;
+            }
+            set {
+                this._index = value;
+            }
+        }
+
         public CounterItem Item {
             get {
                 return this._item;
@@ -50,7 +60,7 @@ namespace DesktopTracker
 
         // methods
 
-        private void btnStart_Click(object sender, EventArgs e)
+        public void Start()
         {
             this._timer.Start();
 
@@ -58,7 +68,7 @@ namespace DesktopTracker
             this.btnPause.Enabled = true;
         }
 
-        private void btnPause_Click(object sender, EventArgs e)
+        public void Pause()
         {
             this._timer.Stop();
 
@@ -66,9 +76,37 @@ namespace DesktopTracker
             this.btnPause.Enabled = false;
         }
 
+        public void Toggle()
+        {
+            if (!this.btnStart.Enabled)
+            {
+                this.Start();
+            }
+            else
+            {
+                this.Pause();
+            }
+        }
+
+        public void SetFocus()
+        {
+            // this.Focus();
+            this.txtLabel.Focus();
+        }
+
         private void UpdateSecondLabel()
         {
             this.lblCounter.Text = TimeSpan.FromSeconds(this._item.Seconds).ToString();
+        }
+
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            this.Start();
+        }
+
+        private void btnPause_Click(object sender, EventArgs e)
+        {
+            this.Pause();
         }
 
         private void _timer_Tick(object sender, EventArgs e)
