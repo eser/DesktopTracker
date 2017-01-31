@@ -120,7 +120,8 @@ namespace DesktopTracker
 
             var control = this.flowLayoutPanel1.Controls[index] as ctlCounter;
 
-            control.SetFocus();
+            // control.SetFocus();
+            control.Toggle();
         }
 
         private void btnAdd_Click(object sender, EventArgs e)

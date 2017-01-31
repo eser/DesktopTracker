@@ -78,7 +78,7 @@ namespace DesktopTracker
 
         public void Toggle()
         {
-            if (!this.btnStart.Enabled)
+            if (this.btnStart.Enabled)
             {
                 this.Start();
             }
