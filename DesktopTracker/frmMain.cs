@@ -1,13 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using DesktopTracker.Helpers;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DesktopTracker
@@ -17,6 +10,7 @@ namespace DesktopTracker
         // fields
 
         private AppFolderManager _appFolderManager;
+        private KeyboardHook _keyboardHook;
 
         // constructors
 
@@ -25,9 +19,23 @@ namespace DesktopTracker
             this.InitializeComponent();
 
             this._appFolderManager = new AppFolderManager();
+            this._keyboardHook = new KeyboardHook();
+            this._keyboardHook.KeyPressed += this._keyboardHook_KeyPressed;
+
+            this.Text += string.Format(" {0}", Application.ProductVersion);
         }
 
         // methods
+
+        private void RegisterHotKeys()
+        {
+            this._keyboardHook.RegisterHotKey(Helpers.ModifierKeys.Win, Keys.Delete);
+        }
+
+        private void UnregisterHotKeys()
+        {
+            this._keyboardHook.Dispose();
+        }
 
         private ctlCounter AddCounterControl()
         {
@@ -44,22 +52,12 @@ namespace DesktopTracker
             return counter;
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private void RemoveCounterControl(ctlCounter control)
         {
-            this.AddCounterControl();
+            this.flowLayoutPanel1.Controls.Remove(control);
         }
 
-        private void Counter_CloseButton(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Emin misiniz?", this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
-            {
-                return;
-            }
-
-            this.flowLayoutPanel1.Controls.Remove(sender as Control);
-        }
-
-        private void frmMain_Load(object sender, EventArgs e)
+        private void LoadItems()
         {
             var items = this._appFolderManager.LoadItems();
 
@@ -70,7 +68,7 @@ namespace DesktopTracker
             }
         }
 
-        private void frmMain_FormClosed(object sender, FormClosedEventArgs e)
+        private void SaveItems()
         {
             var items = new List<CounterItem>();
 
@@ -87,6 +85,38 @@ namespace DesktopTracker
             }
 
             this._appFolderManager.SaveItems(items);
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            this.AddCounterControl();
+        }
+
+        private void Counter_CloseButton(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Emin misiniz?", this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
+            {
+                return;
+            }
+
+            this.RemoveCounterControl(sender as ctlCounter);
+        }
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            this.LoadItems();
+            this.RegisterHotKeys();
+        }
+
+        private void frmMain_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.SaveItems();
+            this.UnregisterHotKeys();
+        }
+
+        private void _keyboardHook_KeyPressed(object sender, KeyPressedEventArgs e)
+        {
+            this.Activate();
         }
     }
 }
